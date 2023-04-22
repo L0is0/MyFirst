@@ -4,29 +4,6 @@ import docx
 import os
 import tempfile
 import shutil
-import configparser
-import os
-
-CONFIG_FILE_NAME = 'config.ini'
-CONFIG_SECTION_NAME = 'SETTINGS'
-CONFIG_WORD_FILE_PATH_KEY = 'WORD_FILE_PATH'
-
-# Загрузить значение пути к файлу Word из файла конфигурации
-config = configparser.ConfigParser()
-config.read(CONFIG_FILE_NAME)
-word_file_path = config.get(CONFIG_SECTION_NAME, CONFIG_WORD_FILE_PATH_KEY, fallback='')
-
-# Если путь к файлу Word не указан в файле конфигурации, запросить его у пользователя
-if not word_file_path:
-    file_path = filedialog.askopenfilename(filetypes=[("Документ Word", "*.docx"), ("Документ Word", "*.doc")])
-    word_file_path = file_path
-    config.set(CONFIG_SECTION_NAME,'word_file_path', word_file_path)
-with open(CONFIG_FILE_NAME, 'w') as config_file:
-config.write(config_file)
-
-
-
-
 
 
 def replace_text_in_word_document(doc_file, old_text1, new_text1, old_text2=None, new_text2=None,
@@ -130,18 +107,12 @@ def on_submit():
         ammo_data = ammo_data_entry.get()
         baggageammo_data = baggageammo_data_entry.get()
 
-try:
-    # Заменить текст в документе Word
-    replace_text_in_word_document(word_file_path.get(), 'SAB', employee_data, 'WEAP', weapon_data, 'NAM', passenger_data, 
-        'ACT', act_number, 'DAY', day_number, 'MON', month_number, 'YEAR', year_number, 'PASS', passport_data, 'NUMB', flight_data, 
-        'CYT', city_data, 'BOR', bort_data, 'BGV', baggageweap_data, 'AMMO', ammo_data, 'BAG', baggageammo_data)
-except Exception as e:
-    messagebox.showerror("Ошибка", f"Произошла ошибка при обработке данных: {e}")
-
-    #Сохранить последнее указанное место расположения файла Word в файле конфигурации
-config.set(CONFIG_SECTION_NAME, 'word_file_path', word_file_path)
-with open(CONFIG_FILE_NAME, 'w') as config_file:
-config.write(config_file)
+        # Заменить текст в документе Word
+        replace_text_in_word_document('D:\\123.docx', 'SAB', employee_data, 'WEAP', weapon_data, 'NAM', passenger_data, 
+            'ACT', act_number, 'DAY', day_number, 'MON', month_number, 'YEAR', year_number, 'PASS', passport_data, 'NUMB', flight_data, 
+            'CYT', city_data, 'BOR', bort_data, 'BGV', baggageweap_data, 'AMMO', ammo_data, 'BAG', baggageammo_data)
+    except Exception as e:
+       messagebox.showerror("Ошибка", f"Произошла ошибка при обработке данных: {e}")
 
 def on_exit():
     # Закрыть окно
@@ -313,18 +284,4 @@ copyright_label.grid(row=17, column=0, padx=5, pady=5, sticky='sw')
 # Разместить его внизу окна, слева
 # copyright_label.pack(side="left", padx=5, pady=5)
 # Запустить главный цикл программы
-
-word_file_label = tk.Label(root, text="Путь к файлу Word:")
-word_file_label.grid(row=19, column=0, padx=5, pady=5)
-word_file_path = tk.StringVar()
-word_file_entry = tk.Entry(root, textvariable=word_file_path)
-word_file_entry.grid(row=19, column=1, padx=5, pady=5)
-
-def select_word_file():
-    file_path = filedialog.askopenfilename(filetypes=[("Документ Word", "*.docx"), ("Документ Word", "*.doc")])
-    word_file_path.set(file_path)
-
-select_word_file_button = tk.Button(root, text="Поиск", command=select_word_file)
-select_word_file_button.grid(row=20, column=2, padx=5, pady=5)
-
 root.mainloop()

@@ -4,6 +4,29 @@ import docx
 import os
 import tempfile
 import shutil
+import configparser
+import os
+
+CONFIG_FILE_NAME = 'config.ini'
+CONFIG_SECTION_NAME = 'SETTINGS'
+CONFIG_WORD_FILE_PATH_KEY = 'WORD_FILE_PATH'
+
+# Загрузить значение пути к файлу Word из файла конфигурации
+config = configparser.ConfigParser()
+config.read(CONFIG_FILE_NAME)
+word_file_path = config.get(CONFIG_SECTION_NAME, CONFIG_WORD_FILE_PATH_KEY, fallback='')
+
+# Если путь к файлу Word не указан в файле конфигурации, запросить его у пользователя
+if not word_file_path:
+    file_path = filedialog.askopenfilename(filetypes=[("Документ Word", "*.docx"), ("Документ Word", "*.doc")])
+    word_file_path = file_path
+    config.set(CONFIG_SECTION_NAME,'word_file_path', word_file_path)
+with open(CONFIG_FILE_NAME, 'w') as config_file:
+config.write(config_file)
+
+
+
+
 
 
 def replace_text_in_word_document(doc_file, old_text1, new_text1, old_text2=None, new_text2=None,
@@ -107,12 +130,18 @@ def on_submit():
         ammo_data = ammo_data_entry.get()
         baggageammo_data = baggageammo_data_entry.get()
 
-        # Заменить текст в документе Word
-        replace_text_in_word_document('D:\\123.docx', 'SAB', employee_data, 'WEAP', weapon_data, 'NAM', passenger_data, 
-            'ACT', act_number, 'DAY', day_number, 'MON', month_number, 'YEAR', year_number, 'PASS', passport_data, 'NUMB', flight_data, 
-            'CYT', city_data, 'BOR', bort_data, 'BGV', baggageweap_data, 'AMMO', ammo_data, 'BAG', baggageammo_data)
-    except Exception as e:
-       messagebox.showerror("Ошибка", f"Произошла ошибка при обработке данных: {e}")
+try:
+    # Заменить текст в документе Word
+    replace_text_in_word_document(word_file_path.get(), 'SAB', employee_data, 'WEAP', weapon_data, 'NAM', passenger_data, 
+        'ACT', act_number, 'DAY', day_number, 'MON', month_number, 'YEAR', year_number, 'PASS', passport_data, 'NUMB', flight_data, 
+        'CYT', city_data, 'BOR', bort_data, 'BGV', baggageweap_data, 'AMMO', ammo_data, 'BAG', baggageammo_data)
+except Exception as e:
+    messagebox.showerror("Ошибка", f"Произошла ошибка при обработке данных: {e}")
+
+    #Сохранить последнее указанное место расположения файла Word в файле конфигурации
+config.set(CONFIG_SECTION_NAME, 'word_file_path', word_file_path)
+with open(CONFIG_FILE_NAME, 'w') as config_file:
+config.write(config_file)
 
 def on_exit():
     # Закрыть окно
@@ -150,7 +179,7 @@ month_number_label.grid(row=3, column=0, padx=5, pady=5)
 month_number_entry = tk.Entry(root, width=70)
 month_number_entry.grid(row=3, column=1, padx=5, pady=5)
 def show_help():
-    messagebox.showinfo("Подсказка", "Введите Текущий месяц текстом а не цифрами.")
+    messagebox.showinfo("Подсказка", "Введите Текущий месяц ТЕКСТОМ а НЕ цифрами.")
 help_button = tk.Button(root, text="?", command=show_help)
 help_button.grid(row=3, column=2, padx=5, pady=5)
 
@@ -160,7 +189,7 @@ year_number_label.grid(row=4, column=0, padx=5, pady=5)
 year_number_entry = tk.Entry(root, width=70)
 year_number_entry.grid(row=4, column=1, padx=5, pady=5)
 def show_help():
-    messagebox.showinfo("Подсказка", "Введите текущий год полностью. Пример: 2023")
+    messagebox.showinfo("Подсказка", "Введите текущий год ПОЛНОСТЬЮ. Пример: 2023")
 help_button = tk.Button(root, text="?", command=show_help)
 help_button.grid(row=4, column=2, padx=5, pady=5)
 
@@ -192,18 +221,30 @@ passenger_data_label = tk.Label(root, text="Фамилия, Имя, Отчест
 passenger_data_label.grid(row=6, column=0, padx=5, pady=5)
 passenger_data_entry = tk.Entry(root, width=70)
 passenger_data_entry.grid(row=6, column=1, padx=5, pady=5)
+def show_help():
+    messagebox.showinfo("Подсказка", "Введите только Фамилию, Имя и Отчество пассажира.")
+help_button = tk.Button(root, text="?", command=show_help)
+help_button.grid(row=6, column=2, padx=5, pady=5)
 
 #Добавить поле для ввода паспортных данных пассажира
 passport_data_label = tk.Label(root, text="Паспортные данные пассажира: ")
 passport_data_label.grid(row=7, column=0, padx=5, pady=5)
 passport_data_entry = tk.Entry(root, width=70)
 passport_data_entry.grid(row=7, column=1, padx=5, pady=5)
+def show_help():
+    messagebox.showinfo("Подсказка", "Введите паспортные данные пассажира (серия, номер, кем и когда выдан).")
+help_button = tk.Button(root, text="?", command=show_help)
+help_button.grid(row=7, column=2, padx=5, pady=5)
 
 #Добавить поле для ввода номера рейса
 flight_data_label = tk.Label(root, text="Номер рейса: ")
 flight_data_label.grid(row=8, column=0, padx=5, pady=5)
 flight_data_entry = tk.Entry(root, width=70)
 flight_data_entry.grid(row=8, column=1, padx=5, pady=5)
+def show_help():
+    messagebox.showinfo("Подсказка", "Не забудьте проверить номер рейса.")
+help_button = tk.Button(root, text="?", command=show_help)
+help_button.grid(row=8, column=2, padx=5, pady=5)
 
 #Добавить поле для ввода аэропорта назначения
 city_data_label = tk.Label(root, text="Аэропорт назначения: ")
@@ -216,6 +257,10 @@ bort_data_label = tk.Label(root, text="Бортовой номер ВС: ")
 bort_data_label.grid(row=10, column=0, padx=5, pady=5)
 bort_data_entry = tk.Entry(root, width=70)
 bort_data_entry.grid(row=10, column=1, padx=5, pady=5)
+def show_help():
+    messagebox.showinfo("Подсказка", "Если бортовой номер не известен, поле можно не заполнять. Допустимо заполнить позднее от руки в уже напечатанном документе.")
+help_button = tk.Button(root, text="?", command=show_help)
+help_button.grid(row=10, column=2, padx=5, pady=5)
 
 #Добавить поле для ввода данных об оружии
 weapon_data_label = tk.Label(root, text="Тип оружия: ")
@@ -223,7 +268,7 @@ weapon_data_label.grid(row=11, column=0, padx=5, pady=5)
 weapon_data_entry = tk.Entry(root, width=70)
 weapon_data_entry.grid(row=11, column=1, padx=5, pady=5)
 def show_help():
-    messagebox.showinfo("Подсказка", "Введите тип оружия и его полные данные (тип, модель оружия,  его регистрационный номер).")
+    messagebox.showinfo("Подсказка", "Введите тип оружия и его полные данные (тип, модель оружия, его регистрационный номер).")
 help_button = tk.Button(root, text="?", command=show_help)
 help_button.grid(row=11, column=2, padx=5, pady=5)
 
@@ -238,6 +283,10 @@ ammo_data_label = tk.Label(root, text="Количество боепирпасо
 ammo_data_label.grid(row=13, column=0, padx=5, pady=5)
 ammo_data_entry = tk.Entry(root, width=70)
 ammo_data_entry.grid(row=13, column=1, padx=5, pady=5)
+def show_help():
+    messagebox.showinfo("Подсказка", "Не забудьте проверить точное количество боеприпасов.")
+help_button = tk.Button(root, text="?", command=show_help)
+help_button.grid(row=13, column=2, padx=5, pady=5)
 
 #Добавить поле для ввода богажной бирки боеприпасов
 baggageammo_data_label = tk.Label(root, text="Номера багажных бирок боеприпасов: ")
@@ -256,9 +305,26 @@ exit_button.grid(row=16, column=1, padx=5, pady=5, sticky='se')
 exit_button.configure(bg='#CD5C5C')
 
 # Создать виджет Label с копирайтом
-copyright_label = tk.Label(root, text="© 2023 El.Psy.Congroo")
+copyright_label = tk.Label(root, text="© 2023 ПАО Аэробратск")
 copyright_label.grid(row=16, column=0, padx=5, pady=5, sticky='sw')
+copyright_label = tk.Label(root, text="El.Psy.Congroo")
+copyright_label.grid(row=17, column=0, padx=5, pady=5, sticky='sw')
+
 # Разместить его внизу окна, слева
 # copyright_label.pack(side="left", padx=5, pady=5)
 # Запустить главный цикл программы
+
+word_file_label = tk.Label(root, text="Путь к файлу Word:")
+word_file_label.grid(row=19, column=0, padx=5, pady=5)
+word_file_path = tk.StringVar()
+word_file_entry = tk.Entry(root, textvariable=word_file_path)
+word_file_entry.grid(row=19, column=1, padx=5, pady=5)
+
+def select_word_file():
+    file_path = filedialog.askopenfilename(filetypes=[("Документ Word", "*.docx"), ("Документ Word", "*.doc")])
+    word_file_path.set(file_path)
+
+select_word_file_button = tk.Button(root, text="Поиск", command=select_word_file)
+select_word_file_button.grid(row=20, column=2, padx=5, pady=5)
+
 root.mainloop()
